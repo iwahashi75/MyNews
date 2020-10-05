@@ -16,15 +16,10 @@ Route::get('/', function () {
 });
 //Laravel9 
 Route::group(['prefix' => 'admin'], function() {
-    Route::get('news/create',
-  'Admin\NewsController@add');
+    Route::get('news/create','Admin\NewsController@add');
+    //
+    Route::get('profile/create','Admin\ProfileController@add');
+    Route::get('profile/edit','Admin\ProfileController@edit');
 });
 
-//Laravel9 課題４
-Route::group(['prefix' => 'admin'],function(){
-    Route::get('profile/ccreate',
-    'ProfileController@add');
-    
-Route::get(['profile/edit,
-    ProfileController@add']);
-});
+Auth::routes();
