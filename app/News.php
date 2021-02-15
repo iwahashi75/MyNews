@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class News extends Model
 {
-    protected $garded = array('id');
+    protected $guarded = array('id');
     
     
     //以下を追記
