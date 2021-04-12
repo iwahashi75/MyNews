@@ -6,6 +6,11 @@ use App\Http\Controllers\Controller;
 
 //Laravel14 追記することでNews　Modelが扱えるようになる
 use App\News;
+//以下を追記
+use App\History;
+
+//laravel17以下を追記
+use Carbon\Carbon;
 
 class NewsController extends Controller
 {
@@ -80,11 +85,26 @@ public function edit(Request $request)
       $news = News::find($request->id);
       // 送信されてきたフォームデータを格納する
       $news_form = $request->all();
-      unset($news_form['_token']);
+      if ($request->remove == 'true') {
+          $news_form['image_path'] = null;
+      } elseif ($request->file('image')) {
+          $path = $request->file('image')->store('public/image');
+          $news_form['image_path'] = basename($path);
+      } else {
+          $news_form['image_path'] = $news->image_path;
+      }
 
+      unset($news_form['image']);
+      unset($news_form['remove']);
+      unset($news_form['_token']);
       // 該当するデータを上書きして保存する
       $news->fill($news_form)->save();
-
+      //Laravel17 History Modelにも編集履歴を追加するよう実装
+      $history = new History;
+      $history->news_id = $news->id;
+      $history->edited_at = Carbon::now();
+      $history->save();
+      
       return redirect('admin/news');
   }
 //以下を追記laravel16 Controllerを実装する

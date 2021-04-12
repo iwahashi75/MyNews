@@ -6,10 +6,27 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 use App\Profile;
+// Laravel17 以下を追記
+use App\ProfileHistory;
+
+use Carbon\Carbon;
 
 class ProfileController extends Controller
 {
-    //以下を追記Actionを追加
+    public function index(Request $request)
+    {
+       $cond_name = $request->cond_name;
+       if ($cond_name != '') {
+         //検索されたら検索結果を取得する
+         $posts = Profile::where('name', $cond_name)->get();
+       }else {
+         //それ以外は全てのニュースを取得する
+          $posts = Profile::all();
+          
+       }
+       return view('admin.profile.index', ['posts' => $posts, 'cond_name' => $cond_name]);
+    }
+    
     public function add()
     {
       return view('admin.profile.create');
@@ -31,7 +48,7 @@ class ProfileController extends Controller
       $profile->save();
       
       // admin/news/createにリダイレクトする
-      return redirect('admin/profile/create');
+      return redirect('admin/profile');
     }
     
     public function edit(Request $request)
@@ -57,6 +74,22 @@ class ProfileController extends Controller
 
       // 該当するデータを上書きして保存する
       $profile->fill($profile_form)->save();
-    }
+      
+      //Laravel17 課題２
+      $history = new ProfileHistory;
+        $history->profile_id = $profile->id;
+        $history->edited_at = Carbon::now();
+        $history->save();
     
+      return redirect('admin/profile');
+    }
+  
+    public function delete(Request $request)
+    {
+    //該当するNews Modelを取得
+      $profile = Profile::find($request->id);
+    //削除する
+      $profile->delete();
+      return redirect('admin/profile/');
+    }
 }
